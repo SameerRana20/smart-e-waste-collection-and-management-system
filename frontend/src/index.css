@@ -1,0 +1,81 @@
+* {
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f4f8f6;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  width: 380px;
+  background: white;
+  padding: 32px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+h2 {
+  margin: 0;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+input {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 14px;
+}
+
+input:focus {
+  border-color: #4caf50;
+}
+
+/* Button with hover effect */
+.btn {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(90deg, #2f9e44, #7cb342);
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 18px rgba(47,158,68,0.35);
+}
+
+.linkText {
+  text-align: center;
+  font-size: 14px;
+}
+
+.linkText a {
+  color: #2f9e44;
+  text-decoration: none;
+  font-weight: 600;
+}
