@@ -1,11 +1,13 @@
 import bcrypt from "bcrypt"
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { createUser, findUserByEmail, removeRefreshToken, updatePassword, updateUserProfile } from "../models/user.model.js";
+import { createUser, findUserByEmail, findUserById, removeRefreshToken, updatePassword, updateUserProfile } from "../models/user.model.js";
 import { apiError } from "../utils/apiError.js"
 import { apiResponse } from "../utils/apiResponse.js"
 import { hashPassword, isPasswordCorrect, isPasswordCorrect} from "../utils/password.util.js"
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.util.js";
 import { updateRefreshToken } from "../models/user.model.js";
+import { jwtVerify } from "../middlewares/auth.middleware.js";
+import jwt from "jsonwebtoken"
 
 const registerUser = asyncHandler(async (req, res)=>{
     const {full_name, email, password, phone, address, city } =req.body
@@ -106,6 +108,57 @@ const logoutUser = asyncHandler(async(req, res)=> {
     )
 })
 
+const getCurrentUser = asyncHandler(async(req, res)=>{
+    const userId= req.user.userId
+
+    const user = await findUserById(userId)
+
+    if(!user) {
+         throw new apiError(404 ,"User not Found")
+    }
+
+    res
+    .status(200)
+    .json(
+        new apiResponse(200, {
+            userId: user.user_id,
+            fullName: user.full_name,
+            email: user.email,
+            phone: user.phone,
+            address: user.address,
+            city: user.city,
+            avatarUrl: user.avatar_url
+        }, "User fetched Successfully")
+    )
+})
+
+const refreshAccessToken = asyncHandler(async(req, res)=>{
+    const someRefreshToken= req.cookies?.refreshToken
+
+    if(!someRefreshToken) {
+        throw new apiError(401, "refresh Token missing")
+    }
+
+    const decodedRefreshToken =  jwt.verify(
+        someRefreshToken,
+         process.env.REFRESH_TOKEN_SECRET)
+
+    const user = await findUserById(decodedRefreshToken.user_id)
+
+    if(!user || user.refresh_token !== someRefreshToken) {
+        throw new apiError(401, "invalid refresh TOken")
+    }
+
+    const newAccessToken = await generateRefreshToken(user)
+
+    res
+    .status(200)
+    .cookie("accessToken", newAccessToken, {httpOnly: true, secure: true})
+    .json(
+        new apiResponse(200, {newAccessToken}, "Access Token refreshed")
+    )
+})
+
 const changePassword = asyncHandler(async (req, res)=> {
     const { password , newPassword }= req.body
     const user_id  = req.user?.user_id 
@@ -156,5 +209,7 @@ export {
     loginUser,
     logoutUser, 
     changePassword,
-    updateProfile
+    updateProfile,
+    getCurrentUser,
+    refreshAccessToken
 }
