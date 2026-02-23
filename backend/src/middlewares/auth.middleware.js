@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import { apiError } from "../utils/apiError"
+import { apiError } from "../utils/apiError.js"
 
 const jwtVerify = async (req, res , next)=> {
     try {

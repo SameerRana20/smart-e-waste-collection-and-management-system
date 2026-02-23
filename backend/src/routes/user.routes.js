@@ -6,10 +6,12 @@ import {
          changePassword,
          updateProfile,
          getCurrentUser,
-         refreshAccessToken
+         refreshAccessToken,
+         updateAvatar
         } from "../controllers/user.controller.js"
  
 import { jwtVerify } from "../middlewares/auth.middleware.js"
+import { upload } from "../middlewares/multer.middleware.js"
 
 const router = express.Router()
 
@@ -26,8 +28,10 @@ router.route("/logout").post(logoutUser)
 
 router.route("/change-password").patch(changePassword)
 
-router.route("profile").patch(updateProfile)
+router.route("/profile").patch(updateProfile)
 
 router.route("/me").get(getCurrentUser)
+
+router.route("/avatar").patch(upload.single("avatar"),  updateAvatar)
 
 export default router

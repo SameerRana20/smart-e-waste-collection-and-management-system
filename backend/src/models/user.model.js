@@ -58,6 +58,14 @@ const updateUserProfile = async (userId , data)=>{
     return result
 }
 
+const updateUserAvatar= async(userId, url)=>{
+    const [result] = await connection.query(
+            `UPDATE users SET avatar_url = ? WHERE user_id = ? `, [url, userId]
+    )
+
+    return result
+}
+
 export
 {
     createUser,
@@ -66,6 +74,7 @@ export
     updateRefreshToken,
     removeRefreshToken,
     updatePassword, 
-    updateUserProfile
+    updateUserProfile,
+    updateUserAvatar
 
 }
