@@ -10,7 +10,8 @@ import {
     findCollectorByEmail,
     findCollectorById,
     updateCollectorRefreshToken,
-    removeCollectorRefreshToken
+    removeCollectorRefreshToken,
+    updateCollectorPassword
 } from "../models/collector.model.js";
 
 import {
@@ -69,7 +70,7 @@ const registerCollector = asyncHandler(async (req, res) => {
         new apiResponse(200, result, "Collector registered successfully. Awaiting admin approval.")
     );
 
-});
+})
 
 const loginCollector = asyncHandler(async (req, res) => {
 
@@ -130,7 +131,7 @@ const loginCollector = asyncHandler(async (req, res) => {
        )
    );
 
-});
+})
 
 const logoutCollector = asyncHandler(async (req, res) => {
 
@@ -146,7 +147,7 @@ const logoutCollector = asyncHandler(async (req, res) => {
             new apiResponse(200, {}, "Collector logged out successfully")
         );
 
-});
+})
 
 const getCollectorProfile = asyncHandler(async (req, res) => {
 
@@ -175,7 +176,77 @@ const getCollectorProfile = asyncHandler(async (req, res) => {
         )
     );
 
-});
+})
+
+const refreshAccessToken = asyncHandler(async(req, res)=> {
+    const incomingRefreshToken = req.cookies?.refreshToken
+
+    if(!incomingRefreshToken) {
+        throw new apiError(400, "Refresh Token missing")
+    }
+
+    const decoded =  jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+
+    const collector = await findCollectorById(decoded.userId)
+
+    if(!collector || collector.refresh_token == incomingRefreshToken) {
+        throw new apiError(400, "invalid Refresh TOken")
+    }
+
+    const newAccessToken = await generateAccessToken({
+        user_id : collector.user_id,
+        email: collector.email
+    })
+
+    res 
+        .cookie("accessToken" , newAccessToken, { httpOnly:true, secure: true })
+        .status(200)
+        .json(
+            new apiResponse(200, {newAccessToken}, "Access Token refreshed")
+        )
+
+})
+
+const changePassword = asyncHandler(async (req, res) => {
+    const { password, newPassword } = req.body
+    const collectorId = req.user?.userId
+
+    if(!password?.trim() || !newPassword?.trim()) {
+        throw new apiError(400, "Old and new password are required");
+    }
+
+    const collector = await findCollectorById(collectorId);
+
+    if(!collector) {
+        throw new apiError(404, "User not found");
+    }
+
+    const isMatch = await isPasswordCorrect(password, collector.password_hash);
+
+    if(!isMatch) {
+        throw new apiError(400, "Invalid old password");
+    }
+
+    const newPasswordHash = await hashPassword(newPassword);
+
+    const result = await updatePassword(collector.collector_id, newPasswordHash);
+
+    if(result.affectedRows === 0) {
+        throw new apiError(500, "Password update failed");
+    }
+
+    await removeRefreshToken(collector.collector_id)
+
+    res
+        .clearCookie("accessToken", { httpOnly: true, secure: true })
+        .clearCookie("refreshToken", { httpOnly: true, secure: true })
+        .status(200)
+        .json(
+            new apiResponse(200, {}, "Password updated successfully. Please login again.")
+        );
+})
+
+
 
 
 
@@ -183,5 +254,7 @@ export {
     registerCollector,
     loginCollector,
     logoutCollector,
-    getCollectorProfile
-};
+    getCollectorProfile,
+    refreshAccessToken,
+    changePassword
+}

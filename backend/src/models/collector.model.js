@@ -43,7 +43,7 @@ const updateCollectorRefreshToken = async (collectorId, refreshToken) => {
     );
 
     return result;
-};
+}
 
 const removeCollectorRefreshToken = async (collectorId) => {
 
@@ -53,13 +53,23 @@ const removeCollectorRefreshToken = async (collectorId) => {
     );
 
     return result;
-};
+}
 
+const updateCollectorPassword = async (collectorId, passwordHash) => {
+
+    const [result] = await connection.query(
+        `UPDATE collectors SET password_hash = ? WHERE collector_id = ?`,
+        [passwordHash, collectorId]
+    )
+
+    return result;
+}
 
 export {
     createCollector,
     findCollectorByEmail,
     findCollectorById,
     updateCollectorRefreshToken,
-    removeCollectorRefreshToken
+    removeCollectorRefreshToken,
+    updateCollectorPassword
 };
