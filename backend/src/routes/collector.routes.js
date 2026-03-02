@@ -16,7 +16,7 @@ router.route("/register").post(registerCollector)
 
 router.route("/login").post(loginCollector)
 
-router.route("/refresh_token").post(refreshAccessToken)
+router.route("/refresh-token").post(refreshAccessToken)
 
 
 //====================== Protected Routes ====================

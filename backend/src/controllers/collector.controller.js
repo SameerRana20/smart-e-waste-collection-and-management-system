@@ -189,7 +189,7 @@ const refreshAccessToken = asyncHandler(async(req, res)=> {
 
     const decoded =  jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
 
-    const collector = await findCollectorById(decoded.user_Id)
+    const collector = await findCollectorById(decoded.userId)
 
     if (!collector || collector.refresh_token !== incomingRefreshToken) {
         throw new apiError(400, "invalid Refresh TOken")
