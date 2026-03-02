@@ -14,7 +14,9 @@ app.use(cookieParser())
 
 
 import router from "./routes/user.routes.js"
+import collectorRouter from "./routes/collector.routes.js"
 
 app.use("/api/v1/user", router)
+app.use("/api/v1/collector", collectorRouter)
 
 export { app }

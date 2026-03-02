@@ -1,5 +1,5 @@
 import  express from "express"
-import { jwtVerify } from "../middlewares/auth.middleware"
+import { jwtVerify } from "../middlewares/auth.middleware.js"
 import {   
         registerCollector,
         loginCollector,

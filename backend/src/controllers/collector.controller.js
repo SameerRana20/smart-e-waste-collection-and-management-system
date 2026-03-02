@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import asyncHandler from "../utils/asyncHandler.js";
-import apiError from "../utils/apiError.js";
-import apiResponse from "../utils/apiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { apiError } from "../utils/apiError.js";
+import { apiResponse } from "../utils/apiResponse.js";
 
 import {
     createCollector,
@@ -19,7 +19,7 @@ import {
     generateRefreshToken
 } from "../utils/jwt.util.js";
 
-import { hashPassword } from "../utils/password.util.js";
+import { hashPassword,isPasswordCorrect } from "../utils/password.util.js";
 
 
 const registerCollector = asyncHandler(async (req, res) => {
@@ -100,14 +100,16 @@ const loginCollector = asyncHandler(async (req, res) => {
         throw new apiError(401, "Invalid credentials");
     }
 
-    const accessToken = generateAccessToken({
+    const accessToken =await generateAccessToken({
         user_id: collector.collector_id,
         email: collector.email
     });
 
-    const refreshToken = generateRefreshToken({
+    const refreshToken = await generateRefreshToken({
         user_id: collector.collector_id
     });
+
+    
 
     await updateCollectorRefreshToken(
         collector.collector_id,
@@ -187,9 +189,9 @@ const refreshAccessToken = asyncHandler(async(req, res)=> {
 
     const decoded =  jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
 
-    const collector = await findCollectorById(decoded.userId)
+    const collector = await findCollectorById(decoded.user_Id)
 
-    if(!collector || collector.refresh_token == incomingRefreshToken) {
+    if (!collector || collector.refresh_token !== incomingRefreshToken) {
         throw new apiError(400, "invalid Refresh TOken")
     }
 
@@ -229,13 +231,13 @@ const changePassword = asyncHandler(async (req, res) => {
 
     const newPasswordHash = await hashPassword(newPassword);
 
-    const result = await updatePassword(collector.collector_id, newPasswordHash);
+    const result = await updateCollectorPassword(collector.collector_id, newPasswordHash);
 
     if(result.affectedRows === 0) {
         throw new apiError(500, "Password update failed");
     }
 
-    await removeRefreshToken(collector.collector_id)
+    await removeCollectorRefreshToken(collector.collector_id)
 
     res
         .clearCookie("accessToken", { httpOnly: true, secure: true })

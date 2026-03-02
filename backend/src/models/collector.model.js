@@ -37,10 +37,9 @@ const findCollectorById = async (collectorId) => {
 
 const updateCollectorRefreshToken = async (collectorId, refreshToken) => {
 
-    const [result] = await connection.query(
-        `UPDATE collectors SET refresh_token = ? WHERE collector_id = ?`,
-        [refreshToken, collectorId]
-    );
+    const [result]= await connection.query(
+        `UPDATE collectors SET refresh_token = ? WHERE collector_id = ?`, [refreshToken, collectorId]
+    )
 
     return result;
 }
