@@ -2,7 +2,7 @@ import { connection } from "../db/db.js"
 
 const createRequest = async (userId, collectorId)=> {
     const [result]= await connection.query(
-        `INSERT INTO ewaste_requests (user_id, collector_id)
+        `INSERT INTO ewaste_requests (user_id,  assigned_collector_id)
          VALUES (?, ?)`,
         [userId, collectorId]
     )
@@ -48,24 +48,42 @@ const findCollectorByCity = async(city)=>{
         `SELECT collector_id 
          FROM collectors
          WHERE city = ? 
+         AND 
          verification_status = 'approved'
-         LIMIT = 1`,
+         LIMIT 1`,
          [city]
     )
 
     return  rows[0];
 }
 
-const deleteRequest = async (requestId)=>{
-    const[result] = await connection.query(
-        `DELETE
-         FROM ewaste_requests
-         WHERE request_id = ? `,
-        [requestId]
-    )
+const deleteRequest = async (requestId) => {
 
-    return result
-}
+    const [result] = await connection.query(
+        `DELETE FROM ewaste_requests
+         WHERE request_id = ?
+         AND status = 'pending'`,
+        [requestId]
+    );
+
+    return result;
+};
+
+const getUserRequestStats = async (userId) => {
+
+const [rows] = await connection.query(
+    `SELECT 
+      COUNT(*) AS total_requests,
+      SUM(status = 'pending') AS pending_requests,
+      SUM(status = 'assigned') AS assigned_requests,
+      SUM(status = 'completed') AS completed_requests
+     FROM ewaste_requests
+     WHERE user_id = ?`,
+    [userId]
+  );
+
+  return rows[0];
+};
 
 export {
     createRequest,
@@ -73,5 +91,6 @@ export {
     getUserRequests,
     getRequestById,
     findCollectorByCity,
-    deleteRequest
+    deleteRequest,
+    getUserRequestStats
 }

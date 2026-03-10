@@ -8,7 +8,8 @@ import { createRequest,
          getUserRequests,
          getRequestById,
          findCollectorByCity,
-         deleteRequest
+         deleteRequest,
+         getUserRequestStats
         } from "../models/request.model.js";
 
 import { findUserById } from "../models/user.model.js";
@@ -29,9 +30,9 @@ const createEwasteRequest = asyncHandler(async(req,res)=>{
         throw new apiError(400, "User not found")
     }
        
-    const userCity = user.userCity
+    const userCity = user.city
 
-    const collector = await findCollectorByCity(userCity)
+    const collector = await findCollectorByCity(userCity.toLowerCase())
 
     if(!collector) {
         throw new apiError(400 , "No collector available in your city")
@@ -66,7 +67,7 @@ const getMyRequests = asyncHandler(async(req, res)=>{
 
 const getSingleRequests = asyncHandler(async(req, res)=>{
     const userId = req.user.userId
-    const requestId = req.params.userId
+    const requestId = req.params.id
 
     const request = await getRequestById(requestId)
 
@@ -80,14 +81,67 @@ const getSingleRequests = asyncHandler(async(req, res)=>{
 
     res
         .status(200)
-        json(
+        .json(
             new apiResponse(200, request, "Request fetched successfully")
         )
 })
+
+const deleteUserRequest = asyncHandler(async (req, res) => {
+
+    const requestId = req.params.id;
+    const userId = req.user.userId;
+
+    const request = await getRequestById(requestId);
+
+    if (!request) {
+        throw new apiError(404, "Request not found");
+    }
+
+    if (request.user_id !== userId) {
+        throw new apiError(403, "Not authorized");
+    }
+
+    // user can cancel only if request is still pending
+    if (request.status !== "pending") {
+        throw new apiError(
+            400,
+            "Only pending requests can be cancelled"
+        );
+    }
+
+    await deleteRequest(requestId);
+
+    res.status(200).json(
+        new apiResponse(
+            200,
+            {},
+            "Request cancelled successfully"
+        )
+    );
+
+});
+
+const getRequestStats = asyncHandler(async (req, res) => {
+
+  const userId = req.user.userId;
+
+  const stats = await getUserRequestStats(userId);
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      stats,
+      "Request statistics fetched successfully"
+    )
+  );
+
+});
 
 
 export {
     createEwasteRequest,
     getMyRequests,
-    getSingleRequests
+    getSingleRequests,
+    deleteUserRequest,
+    getRequestStats
 }
