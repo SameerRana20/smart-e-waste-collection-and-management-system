@@ -85,6 +85,69 @@ const [rows] = await connection.query(
   return rows[0];
 };
 
+const getCollectorRequests = async (collectorId) => {
+
+  const [rows] = await connection.query(
+    `SELECT *
+     FROM ewaste_requests
+     WHERE assigned_collector_id = ?`,
+    [collectorId]
+  );
+
+  return rows;
+};
+
+const updateRequestStatus = async (requestId, status) => {
+
+  const [result] = await connection.query(
+    `UPDATE ewaste_requests
+     SET status = ?
+     WHERE request_id = ?`,
+    [status, requestId]
+  );
+
+  return result;
+};
+
+const createPickupActivity = async (requestId, collectorId, scheduledDate) => {
+
+  const [result] = await connection.query(
+    `INSERT INTO pickup_activity
+     (request_id, collector_id, scheduled_date)
+     VALUES (?, ?, ?)`,
+    [requestId, collectorId, scheduledDate]
+  );
+
+  return result.insertId;
+};
+
+const markPickupCompleted = async (requestId) => {
+
+  await connection.query(
+    `UPDATE pickup_activity
+     SET collected_at = NOW()
+     WHERE request_id = ?`,
+    [requestId]
+  );
+};
+
+const createDisposition = async (
+  requestId,
+  collectorId,
+  dispositionType,
+  remarks
+) => {
+
+  const [result] = await connection.query(
+    `INSERT INTO ewaste_disposition
+     (request_id, collector_id, disposition_type, remarks)
+     VALUES (?, ?, ?, ?)`,
+    [requestId, collectorId, dispositionType, remarks]
+  );
+
+  return result.insertId;
+};
+
 export {
     createRequest,
     addItemToRequest,
@@ -92,5 +155,10 @@ export {
     getRequestById,
     findCollectorByCity,
     deleteRequest,
-    getUserRequestStats
+    getUserRequestStats,
+    getCollectorRequests,
+    updateRequestStatus,
+    createPickupActivity,
+    markPickupCompleted,
+    createDisposition
 }

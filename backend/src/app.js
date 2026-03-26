@@ -17,12 +17,13 @@ import router from "./routes/user.routes.js"
 import collectorRouter from "./routes/collector.routes.js"
 import adminRouter from "./routes/admin.routes.js"
 import requestRoutes from "./routes/request.routes.js";
+import collectorRequestRoutes from "./routes/collectorRequest.routes.js";
 
- 
-
+  
 app.use("/api/v1/user", router)
 app.use("/api/v1/collector", collectorRouter)
 app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/requests", requestRoutes);
+app.use("/api/v1/collector", collectorRequestRoutes);
 
 export { app }
