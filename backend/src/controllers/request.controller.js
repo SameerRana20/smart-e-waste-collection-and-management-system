@@ -51,7 +51,7 @@ const createEwasteRequest = asyncHandler(async(req,res)=>{
     res
     .status(200)
     .json(
-        new apiResponse(200,{ requestId }, " E-waste request created sucessfully")
+        new apiResponse(200,{ requestId , itemIds}, " E-waste request created sucessfully")
     )
 
 })

@@ -6,7 +6,8 @@ import {
   approveRequest,
   rejectRequest,
   completePickup,
-  recordDisposition
+  recordDisposition,
+  getSingleRequestDetailed
 } from "../controllers/collectorRequest.controller.js";
 
 const router = Router();
@@ -22,5 +23,7 @@ router.route("/request/:id/reject").patch(rejectRequest);
 router.route("/request/:id/pickup").patch(completePickup);
 
 router.route("/request/:id/disposition").post(recordDisposition);
+
+router.get("/requests/:id", getSingleRequestDetailed);
 
 export default router;

@@ -69,6 +69,46 @@ const updateAdminAvatar= async(AdminId, url)=>{
     return result
 }
 
+const getAdminStats = async () => {
+
+  const [[users]] = await connection.query(
+    `SELECT COUNT(*) AS total_users FROM users`
+  );
+
+  const [[collectors]] = await connection.query(
+    `SELECT COUNT(*) AS total_collectors FROM collectors`
+  );
+
+  const [[requests]] = await connection.query(
+    `SELECT 
+      COUNT(*) AS total_requests,
+      SUM(status = 'pending') AS pending,
+      SUM(status = 'assigned') AS assigned,
+      SUM(status = 'completed') AS completed
+     FROM ewaste_requests`
+  );
+
+  const [[disposition]] = await connection.query(
+    `SELECT 
+      SUM(disposition_type = 'recycled') AS recycled,
+      SUM(disposition_type = 'reused') AS reused,
+      SUM(disposition_type = 'disposed') AS disposed
+     FROM ewaste_disposition`
+  );
+
+  const [[items]] = await connection.query(
+    `SELECT SUM(quantity) AS total_items FROM ewaste_items`
+  );
+
+  return {
+    users: users.total_users,
+    collectors: collectors.total_collectors,
+    requests,
+    disposition,
+    total_items: items.total_items || 0
+  };
+};
+
 export
 {
     createAdmin,
@@ -78,6 +118,7 @@ export
     removeAdminRefreshToken,
     updatePassword, 
     updateAdminProfile,
-    updateAdminAvatar
+    updateAdminAvatar,
+    getAdminStats
 
 }

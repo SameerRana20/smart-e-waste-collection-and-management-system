@@ -64,11 +64,60 @@ const updateCollectorPassword = async (collectorId, passwordHash) => {
     return result;
 }
 
+const updateCollectorStatus = async (collectorId, status) => {
+  const [result] = await connection.query(
+    `UPDATE collectors SET verification_status = ? WHERE collector_id = ?`,
+    [status, collectorId]
+  );
+  return result;
+};
+
+const getAllCollectors = async () => {
+
+  const [rows] = await connection.query(
+    `SELECT 
+      collector_id,
+      full_name,
+      email,
+      phone,
+      city,
+      organization_name,
+      verification_status
+     FROM collectors
+     ORDER BY created_at DESC`
+  );
+
+  return rows;
+};
+
+const getPendingCollectors = async () => {
+
+  const [rows] = await connection.query(
+    `SELECT 
+      collector_id,
+      full_name,
+      email,
+      phone,
+      city,
+      vehicle_number,
+      organization_name,
+      verification_status
+     FROM collectors
+     WHERE verification_status = 'pending'
+     ORDER BY created_at DESC`
+  );
+
+  return rows;
+};
+
 export {
     createCollector,
     findCollectorByEmail,
     findCollectorById,
     updateCollectorRefreshToken,
     removeCollectorRefreshToken,
-    updateCollectorPassword
+    updateCollectorPassword,
+    updateCollectorStatus,
+    getAllCollectors,
+    getPendingCollectors
 };

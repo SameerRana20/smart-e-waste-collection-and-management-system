@@ -7,7 +7,14 @@ import {
          updateProfile,
          getCurrentAdmin,
          refreshAccessToken,
-         updateAvatar
+         updateAvatar,
+         getDashboardStats,
+         getAllCollectorsAdmin,
+         getAllRequestsDetailedAdmin,
+         getAllRequestsAdmin,
+         approveCollector,
+         rejectCollector,
+         getPendingCollectorsAdmin
         } from "../controllers/admin.controller.js"
  
 import { jwtVerify } from "../middlewares/auth.middleware.js"
@@ -31,5 +38,19 @@ router.route("/profile").patch(updateProfile)
 router.route("/me").get(getCurrentAdmin)
 
 router.route("/avatar").patch(upload.single("avatar"),  updateAvatar)
+
+router.patch("/collector/:id/approve",  approveCollector);
+
+router.patch("/collector/:id/reject", rejectCollector);
+
+router.get("/requests",  getAllRequestsAdmin);
+
+router.get("/dashboard", getDashboardStats);
+
+router.get("/collectors", getAllCollectorsAdmin);
+
+router.get("/requests-detailed", getAllRequestsDetailedAdmin);
+
+router.get("/collectors/pending",  getPendingCollectorsAdmin);
 
 export default router

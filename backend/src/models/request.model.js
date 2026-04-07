@@ -159,6 +159,62 @@ const addImageToItem = async (itemId, imageUrl) => {
   return result.insertId;
 };
 
+const getAllRequests = async () => {
+  const [rows] = await connection.query(
+    `SELECT * FROM ewaste_requests ORDER BY request_date DESC`
+  );
+  return rows;
+};
+
+const getAllRequestsDetailed = async () => {
+
+  const [rows] = await connection.query(
+    `SELECT 
+      er.request_id,
+      er.status,
+      er.request_date,
+      u.full_name AS user_name,
+      u.city,
+      c.full_name AS collector_name
+     FROM ewaste_requests er
+     JOIN users u ON er.user_id = u.user_id
+     LEFT JOIN collectors c ON er.assigned_collector_id = c.collector_id
+     ORDER BY er.request_date DESC`
+  );
+
+  return rows;
+};
+
+const getRequestWithItemsAndImages = async (requestId) => {
+
+  const [requestRows] = await connection.query(
+    `SELECT * FROM ewaste_requests WHERE request_id = ?`,
+    [requestId]
+  );
+
+  if (requestRows.length === 0) return null;
+
+  const request = requestRows[0];
+
+  const [items] = await connection.query(
+    `SELECT * FROM ewaste_items WHERE request_id = ?`,
+    [requestId]
+  );
+
+  for (let item of items) {
+    const [images] = await connection.query(
+      `SELECT image_url FROM ewaste_images WHERE item_id = ?`,
+      [item.item_id]
+    );
+
+    item.images = images.map(img => img.image_url);
+  }
+
+  request.items = items;
+
+  return request;
+};
+
 export {
     createRequest,
     addItemToRequest,
@@ -172,5 +228,8 @@ export {
     createPickupActivity,
     markPickupCompleted,
     createDisposition,
-    addImageToItem
+    addImageToItem,
+    getAllRequests,
+    getAllRequestsDetailed,
+    getRequestWithItemsAndImages
 }

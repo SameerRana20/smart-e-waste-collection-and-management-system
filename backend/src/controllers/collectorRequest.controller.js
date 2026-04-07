@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { apiError } from "../utils/apiError.js";
+import { connection } from "../db/db.js";
 
 import {
   getCollectorRequests,
@@ -8,7 +9,8 @@ import {
   updateRequestStatus,
   createPickupActivity,
   markPickupCompleted,
-  createDisposition
+  createDisposition,
+  getRequestWithItemsAndImages
 } from "../models/request.model.js";
 
 import { addRewardPoints } from "../models/user.model.js";
@@ -24,6 +26,7 @@ const getAssignedRequests = asyncHandler(async (req, res) => {
     new apiResponse(200, requests, "Assigned requests fetched")
   );
 });
+
 
 const approveRequest = asyncHandler(async (req, res) => {
 
@@ -49,14 +52,32 @@ const approveRequest = asyncHandler(async (req, res) => {
     throw new apiError(400, "Request cannot be approved");
   }
 
-  await updateRequestStatus(requestId, "assigned");
+  const conn = await connection.getConnection();
 
-  await createPickupActivity(requestId, collectorId, scheduledDate);
+  try {
+
+    await conn.beginTransaction();
+
+    await updateRequestStatus(requestId, "assigned", conn);
+
+    await createPickupActivity(requestId, collectorId, scheduledDate, conn);
+
+    await conn.commit();
+
+  } catch (error) {
+
+    await conn.rollback();
+    throw new apiError(500, "Approval failed");
+
+  } finally {
+    conn.release();
+  }
 
   res.status(200).json(
     new apiResponse(200, {}, "Request approved and pickup scheduled")
   );
 });
+
 
 const rejectRequest = asyncHandler(async (req, res) => {
 
@@ -84,6 +105,7 @@ const rejectRequest = asyncHandler(async (req, res) => {
   );
 });
 
+
 const completePickup = asyncHandler(async (req, res) => {
 
   const collectorId = req.user.userId;
@@ -110,14 +132,12 @@ const completePickup = asyncHandler(async (req, res) => {
   );
 });
 
+
 const recordDisposition = asyncHandler(async (req, res) => {
 
   const collectorId = req.user.userId;
   const requestId = req.params.id;
-
   const { dispositionType, remarks } = req.body;
-
-  
 
   if (!dispositionType) {
     throw new apiError(400, "Disposition type is required");
@@ -134,22 +154,66 @@ const recordDisposition = asyncHandler(async (req, res) => {
   }
 
   if (request.status !== "assigned") {
-    throw new apiError(400, "Request not ready for disposition");
+    throw new apiError(400, "Request not ready");
   }
 
-  await createDisposition(
-    requestId,
-    collectorId,
-    dispositionType,
-    remarks || null
-  );
+  let points = 0;
+  if (dispositionType === "recycled") points = 100;
+  else if (dispositionType === "reused") points = 70;
+  else if (dispositionType === "disposed") points = 50;
 
-  await updateRequestStatus(requestId, "completed");
+  const conn = await connection.getConnection();
 
-  await addRewardPoints(request.user_id, 150);
+  try {
+
+    await conn.beginTransaction();
+
+    await createDisposition(
+      requestId,
+      collectorId,
+      dispositionType,
+      remarks || null,
+      conn
+    );
+
+    await updateRequestStatus(requestId, "completed", conn);
+
+    await addRewardPoints(request.user_id, points, conn);
+
+    await conn.commit();
+
+  } catch (error) {
+
+    await conn.rollback();
+    throw new apiError(500, "Transaction failed");
+
+  } finally {
+    conn.release();
+  }
 
   res.status(200).json(
-    new apiResponse(200, {}, "Disposition recorded and request completed")
+    new apiResponse(200, {}, "Disposition recorded successfully")
+  );
+});
+
+
+const getSingleRequestDetailed = asyncHandler(async (req, res) => {
+
+  const collectorId = req.user.userId;
+  const requestId = req.params.id;
+
+  const request = await getRequestWithItemsAndImages(requestId);
+
+  if (!request) {
+    throw new apiError(404, "Request not found");
+  }
+
+  if (request.assigned_collector_id !== collectorId) {
+    throw new apiError(403, "Not authorized");
+  }
+
+  res.status(200).json(
+    new apiResponse(200, request, "Request details fetched")
   );
 });
 
@@ -159,5 +223,6 @@ export {
   approveRequest,
   rejectRequest,
   completePickup,
-  recordDisposition
+  recordDisposition,
+  getSingleRequestDetailed
 };

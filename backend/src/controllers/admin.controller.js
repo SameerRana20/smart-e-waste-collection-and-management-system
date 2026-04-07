@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 import { asyncHandler } from "../utils/asyncHandler.js";
-import {  findAdminByUsername, findAdminById, removeAdminRefreshToken, updatePassword, updateAdminAvatar, updateAdminProfile } from "../models/admin.model.js";
+import {  findAdminByUsername, findAdminById, removeAdminRefreshToken, updatePassword, updateAdminAvatar, updateAdminProfile , getAdminStats} from "../models/admin.model.js";
 import { apiError } from "../utils/apiError.js"
 import { apiResponse } from "../utils/apiResponse.js"
 import { hashPassword, isPasswordCorrect } from "../utils/password.util.js"
@@ -9,7 +9,8 @@ import { updateAdminRefreshToken } from "../models/admin.model.js";
 import { jwtVerify } from "../middlewares/auth.middleware.js";
 import jwt from "jsonwebtoken"
 import { uploadOnCloudinary } from "../utils/cloudinary.util.js";
-
+import { updateCollectorStatus, getAllCollectors,getPendingCollectors } from "../models/collector.model.js";
+import { getAllRequests, getAllRequestsDetailed } from "../models/request.model.js";
  
 
 const loginAdmin= asyncHandler(async(req, res)=>{
@@ -215,6 +216,69 @@ const updateAvatar = asyncHandler(async(req, res)=>{
     )
 })
 
+const approveCollector = asyncHandler(async (req, res) => {
+
+  await updateCollectorStatus(req.params.id, "approved");
+
+  res.status(200).json(
+    new apiResponse(200, {}, "Collector approved")
+  );
+});
+
+const rejectCollector = asyncHandler(async (req, res) => {
+
+  await updateCollectorStatus(req.params.id, "rejected");
+
+  res.status(200).json(
+    new apiResponse(200, {}, "Collector rejected")
+  );
+});
+
+const getAllRequestsAdmin = asyncHandler(async (req, res) => {
+
+  const requests = await getAllRequests();
+
+  res.status(200).json(
+    new apiResponse(200, requests, "All requests fetched")
+  );
+});
+
+const getDashboardStats = asyncHandler(async (req, res) => {
+
+  const stats = await getAdminStats();
+
+  res.status(200).json(
+    new apiResponse(200, stats, "Dashboard stats fetched")
+  );
+});
+
+const getAllCollectorsAdmin = asyncHandler(async (req, res) => {
+
+  const collectors = await getAllCollectors();
+
+  res.status(200).json(
+    new apiResponse(200, collectors, "Collectors fetched")
+  );
+});
+
+const getAllRequestsDetailedAdmin = asyncHandler(async (req, res) => {
+
+  const requests = await getAllRequestsDetailed();
+
+  res.status(200).json(
+    new apiResponse(200, requests, "Detailed requests fetched")
+  );
+});
+
+const getPendingCollectorsAdmin = asyncHandler(async (req, res) => {
+
+  const collectors = await getPendingCollectors();
+
+  res.status(200).json(
+    new apiResponse(200, collectors, "Pending collectors fetched")
+  );
+});
+
 export {  
     loginAdmin,
     logoutAdmin, 
@@ -222,5 +286,12 @@ export {
     updateProfile,
     getCurrentAdmin,
     refreshAccessToken,
-    updateAvatar
+    updateAvatar,
+    getAllRequestsAdmin,
+    approveCollector,
+    rejectCollector,
+    getDashboardStats,
+    getAllCollectorsAdmin,
+    getAllRequestsDetailedAdmin,
+    getPendingCollectorsAdmin
 }
