@@ -117,7 +117,7 @@ const recordDisposition = asyncHandler(async (req, res) => {
 
   const { dispositionType, remarks } = req.body;
 
-  const requests = await getRequestById(requestId);
+  
 
   if (!dispositionType) {
     throw new apiError(400, "Disposition type is required");
@@ -146,7 +146,7 @@ const recordDisposition = asyncHandler(async (req, res) => {
 
   await updateRequestStatus(requestId, "completed");
 
-  await addRewardPoints(requests.user_id, 150);
+  await addRewardPoints(request.user_id, 150);
 
   res.status(200).json(
     new apiResponse(200, {}, "Disposition recorded and request completed")

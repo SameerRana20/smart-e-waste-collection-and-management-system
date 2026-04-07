@@ -20,7 +20,7 @@ const createEwasteRequest = asyncHandler(async(req,res)=>{
     const userId = req.user.userId
     const { items } = req.body
 
-    if(!items || items === 0 ) {
+    if(!items || items.length === 0 ) {
         throw new apiError(400, "Items are required")
     }
          
@@ -41,9 +41,12 @@ const createEwasteRequest = asyncHandler(async(req,res)=>{
     const requestId = await createRequest(userId , collector.collector_id)
 
     //insert items
-    for(const item of items) {
-        await addItemToRequest(requestId, item)
-    }
+    const itemIds = [];
+
+    for (const item of items) {
+        const itemId = await addItemToRequest(requestId, item);
+        itemIds.push(itemId);
+    }   
 
     res
     .status(200)

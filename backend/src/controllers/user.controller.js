@@ -1,6 +1,15 @@
 import bcrypt from "bcrypt"
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { createUser, findUserByEmail, findUserById, removeRefreshToken, updatePassword, updateUserAvatar, updateUserProfile } from "../models/user.model.js";
+import { createUser,
+         findUserByEmail,
+          findUserById,
+           removeRefreshToken,
+            updatePassword,
+             updateUserAvatar,
+              updateUserProfile,
+              getUserPoints,
+            deductRewardPoints,
+        createRedemption } from "../models/user.model.js";
 import { apiError } from "../utils/apiError.js"
 import { apiResponse } from "../utils/apiResponse.js"
 import { hashPassword, isPasswordCorrect } from "../utils/password.util.js"

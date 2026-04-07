@@ -148,6 +148,17 @@ const createDisposition = async (
   return result.insertId;
 };
 
+const addImageToItem = async (itemId, imageUrl) => {
+
+  const [result] = await connection.query(
+    `INSERT INTO ewaste_images (item_id, image_url)
+     VALUES (?, ?)`,
+    [itemId, imageUrl]
+  );
+
+  return result.insertId;
+};
+
 export {
     createRequest,
     addItemToRequest,
@@ -160,5 +171,6 @@ export {
     updateRequestStatus,
     createPickupActivity,
     markPickupCompleted,
-    createDisposition
+    createDisposition,
+    addImageToItem
 }
