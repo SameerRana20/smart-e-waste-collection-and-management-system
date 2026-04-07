@@ -66,6 +66,53 @@ const updateUserAvatar= async(userId, url)=>{
     return result
 }
 
+const addRewardPoints = async (userId, points) => {
+
+  const [result] = await connection.query(
+    `UPDATE users
+     SET reward_points = reward_points + ?
+     WHERE user_id = ?`,
+    [points, userId]
+  );
+
+  return result;
+};
+
+const deductRewardPoints = async (userId, points) => {
+
+  const [result] = await connection.query(
+    `UPDATE users
+     SET reward_points = reward_points - ?
+     WHERE user_id = ?`,
+    [points, userId]
+  );
+
+  return result;
+};
+
+const getUserPoints = async (userId) => {
+
+  const [rows] = await connection.query(
+    `SELECT reward_points FROM users WHERE user_id = ?`,
+    [userId]
+  );
+
+  return rows[0];
+};
+
+//CREATE REDEMPTION ENTRY
+const createRedemption = async (userId, points) => {
+
+  const [result] = await connection.query(
+    `INSERT INTO incentive_redemptions
+     (user_id, points_redeemed)
+     VALUES (?, ?)`,
+    [userId, points]
+  );
+
+  return result.insertId;
+};
+
 export
 {
     createUser,
@@ -75,6 +122,10 @@ export
     removeRefreshToken,
     updatePassword, 
     updateUserProfile,
-    updateUserAvatar
+    updateUserAvatar,
+    addRewardPoints,
+    deductRewardPoints,
+    getUserPoints,
+    createRedemption
 
 }

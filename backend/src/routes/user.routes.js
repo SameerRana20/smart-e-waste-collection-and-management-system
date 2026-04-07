@@ -7,7 +7,8 @@ import {
          updateProfile,
          getCurrentUser,
          refreshAccessToken,
-         updateAvatar
+         updateAvatar,
+         getMyPoints
         } from "../controllers/user.controller.js"
  
 import { jwtVerify } from "../middlewares/auth.middleware.js"
@@ -33,5 +34,7 @@ router.route("/profile").patch(updateProfile)
 router.route("/me").get(getCurrentUser)
 
 router.route("/avatar").patch(upload.single("avatar"),  updateAvatar)
+
+router.route("/points").get(jwtVerify, getMyPoints);
 
 export default router

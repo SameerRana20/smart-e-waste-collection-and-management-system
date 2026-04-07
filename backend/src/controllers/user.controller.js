@@ -250,6 +250,56 @@ const updateAvatar = asyncHandler(async(req, res)=>{
     )
 })
 
+const redeemPoints = asyncHandler(async (req, res) => {
+
+  const userId = req.user.userId;
+  const { points } = req.body;
+
+  if (!points || points <= 0) {
+    throw new apiError(400, "Invalid points");
+  }
+
+  const user = await getUserPoints(userId);
+
+  if (!user) {
+    throw new apiError(404, "User not found");
+  }
+
+  if (user.reward_points < points) {
+    throw new apiError(400, "Insufficient points");
+  }
+
+  // deduct points
+  await deductRewardPoints(userId, points);
+
+  // log redemption
+  await createRedemption(userId, points);
+
+  res.status(200).json(
+    new apiResponse(200, {}, "Points redeemed successfully")
+  );
+
+});
+
+const getMyPoints = asyncHandler(async (req, res) => {
+
+  const userId = req.user.userId;
+
+  const user = await getUserPoints(userId);
+
+  if (!user) {
+    throw new apiError(404, "User not found");
+  }
+
+  res.status(200).json(
+    new apiResponse(
+      200,
+      { rewardPoints: user.reward_points },
+      "User points fetched successfully"
+    )
+  );
+
+});
 export {
     registerUser,
     loginUser,
@@ -258,5 +308,7 @@ export {
     updateProfile,
     getCurrentUser,
     refreshAccessToken,
-    updateAvatar
+    updateAvatar,
+   getMyPoints,
+   redeemPoints
 }
