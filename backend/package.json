@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "dev": "nodemon src/index.js",
+        "start": "node src/index.js",
         "setup-db": "node database/setupDb.js",
         "seed-admin": "node database/seedAdmin.js"
     },
