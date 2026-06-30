@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS ewaste_management;
-
-USE ewaste_management;
 
 CREATE TABLE IF NOT EXISTS users
 (
