@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser"
 const app = express()
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "http://localhost:5174",
   credentials: true
 }));
 app.use(express.json())
@@ -28,5 +28,15 @@ app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/requests", requestRoutes);
 app.use("/api/v1/collector", collectorRequestRoutes);
 app.use("/api/v1/images", imageRoutes);
+
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    errors: err.errors || [],
+  });
+});
 
 export { app }

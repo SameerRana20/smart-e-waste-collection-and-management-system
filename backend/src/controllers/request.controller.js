@@ -34,11 +34,9 @@ const createEwasteRequest = asyncHandler(async(req,res)=>{
 
     const collector = await findCollectorByCity(userCity.toLowerCase())
 
-    if(!collector) {
-        throw new apiError(400 , "No collector available in your city")
-    }
+    const collectorId = collector ? collector.collector_id : null;
 
-    const requestId = await createRequest(userId , collector.collector_id)
+    const requestId = await createRequest(userId, collectorId);
 
     //insert items
     const itemIds = [];
