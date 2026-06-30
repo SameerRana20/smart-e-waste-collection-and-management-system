@@ -20,7 +20,7 @@ const seedAdmin = async () => {
             user: DB_USER,
             password: DB_PASSWORD,
             database: DB_NAME,
-            port: 3306
+            port: Number(process.env.DB_PORT) || 3306,
         })
 
         // Check if this admin username already exists
