@@ -4,7 +4,9 @@
     "description": "Final Year Project",
     "main": "index.js",
     "scripts": {
-        "dev": "nodemon src/index.js"
+        "dev": "nodemon src/index.js",
+        "setup-db": "node database/setupDb.js",
+        "seed-admin": "node database/seedAdmin.js"
     },
     "repository": {
         "type": "git",
