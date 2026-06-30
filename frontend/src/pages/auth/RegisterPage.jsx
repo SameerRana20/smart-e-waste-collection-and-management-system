@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Leaf, UserPlus } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/Button.jsx'
 import { Card } from '../../components/ui/Card.jsx'
 import { Input } from '../../components/ui/Input.jsx'
@@ -108,9 +108,11 @@ export function RegisterPage() {
 
             <div className="mt-5 text-center text-sm text-slate-600">
               Already have an account?{' '}
-              <a className="font-medium text-brand-700 hover:underline" href="/login">
-                Sign in
-              </a>
+                <Link
+                  to="/login"
+                  className="font-medium text-brand-700 hover:underline"  >
+                   Sign in
+               </Link>
             </div>
           </Card>
         </div>

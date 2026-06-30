@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Leaf, LogIn } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/Button.jsx'
 import { Card } from '../../components/ui/Card.jsx'
 import { Input } from '../../components/ui/Input.jsx'
@@ -148,15 +148,15 @@ export function LoginPage() {
 
             <div className="mt-5 text-center text-sm text-slate-600">
               New user?{' '}
-              <a className="font-medium text-brand-700 hover:underline" href="/register">
-                Create an account
-              </a>
+               <Link to="/register" className="font-medium text-brand-700 hover:underline">
+                  Create an account
+                </Link>
             </div>
             <div className="mt-2 text-center text-sm text-slate-600">
               Want to become a collector?{' '}
-              <a className="font-medium text-brand-700 hover:underline" href="/collector/register">
-                Register as collector
-              </a>
+              <Link to="/collector/register" className="font-medium text-brand-700 hover:underline">
+                 Register as collector
+              </Link>
             </div>
           </Card>
         </div>
