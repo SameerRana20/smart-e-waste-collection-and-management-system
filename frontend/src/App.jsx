@@ -1,59 +1,78 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { ProtectedRoute } from './components/auth/ProtectedRoute.jsx'
+import { RoleRoute } from './components/auth/RoleRoute.jsx'
+import { PublicOnlyRoute } from './components/auth/PublicOnlyRoute.jsx'
+import { AppShell } from './components/layout/AppShell.jsx'
 
-function SignIn() {
-  return (
-    <div className="card">
-      <h2>Welcome back</h2>
-      <p className="subtitle">Sign in to continue</p>
+import { LoginPage } from './pages/auth/LoginPage.jsx'
+import { RegisterPage } from './pages/auth/RegisterPage.jsx'
+import { CollectorRegisterPage } from './pages/auth/CollectorRegisterPage.jsx'
 
-      <label>Email:</label>
-      <input type="email" placeholder="Email Address" />
-      <label>Password:</label>
-      <input type="password" placeholder="Password" />
+import { UserDashboard } from './pages/user/UserDashboard.jsx'
+import { UserProfile } from './pages/user/UserProfile.jsx'
+import { CreateRequest } from './pages/user/CreateRequest.jsx'
+import { MyRequests } from './pages/user/MyRequests.jsx'
+import { RequestDetailsUser } from './pages/user/RequestDetailsUser.jsx'
+import { Rewards } from './pages/user/Rewards.jsx'
 
-      <button className="btn">Sign In →</button>
+import { CollectorDashboard } from './pages/collector/CollectorDashboard.jsx'
+import { CollectorProfile } from './pages/collector/CollectorProfile.jsx'
+import { AssignedRequests } from './pages/collector/AssignedRequests.jsx'
+import { CollectorRequestDetails } from './pages/collector/CollectorRequestDetails.jsx'
 
-      <p className="linkText">
-        Don't have an account? <Link to="/signup">Sign up</Link>
-      </p>
-    </div>
-  );
-}
-
-function SignUp() {
-  return (
-    <div className="card">
-      <h2>Create your account</h2>
-      <p className="subtitle">Start managing e-waste responsibly</p>
-      <label>Full Name*:</label>
-      <input type="text" placeholder="Full Name" />
-      <label>Phone Number:</label>
-      <input type="text" placeholder="Phone Number" />
-      <label>Address:</label>
-      <input type="text" placeholder="Address" />
-      <label>Email*:</label>
-      <input type="email" placeholder="Email Address" />
-      <label>Password*:</label>
-      <input type="password" placeholder="Password" />
-      <label>Confirm Password:</label>
-      <input type="password" placeholder="Confirm Password" />
-
-      <button className="btn">Create Account →</button>
-
-      <p className="linkText">
-        Already have an account? <Link to="/">Sign in</Link>
-      </p>
-    </div>
-  );
-}
+import { AdminDashboard } from './pages/admin/AdminDashboard.jsx'
+import { AdminProfile } from './pages/admin/AdminProfile.jsx'
+import { PendingCollectors } from './pages/admin/PendingCollectors.jsx'
+import { AllCollectors } from './pages/admin/AllCollectors.jsx'
+import { AllRequests } from './pages/admin/AllRequests.jsx'
+import { Landing } from './pages/Landing.jsx'
 
 export default function App() {
   return (
-    <div className="page">
-      <Routes>
-        <Route path="/" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-      </Routes>
-    </div>
-  );
+    <Routes>
+      {/* Public landing page is always accessible */}
+      <Route path="/" element={<Landing />} />
+
+      <Route element={<PublicOnlyRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/collector/register" element={<CollectorRegisterPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppShell />}>
+          
+
+          <Route element={<RoleRoute allow={['user']} />}>
+            <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/requests/new" element={<CreateRequest />} />
+            <Route path="/requests" element={<MyRequests />} />
+            <Route path="/requests/:id" element={<RequestDetailsUser />} />
+            <Route path="/rewards" element={<Rewards />} />
+          </Route>
+
+          <Route element={<RoleRoute allow={['collector']} />}>
+            <Route path="/collector" element={<CollectorDashboard />} />
+            <Route path="/collector/profile" element={<CollectorProfile />} />
+            <Route path="/collector/requests" element={<AssignedRequests />} />
+            <Route
+              path="/collector/requests/:id"
+              element={<CollectorRequestDetails />}
+            />
+          </Route>
+
+          <Route element={<RoleRoute allow={['admin']} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/profile" element={<AdminProfile />} />
+            <Route path="/admin/collectors/pending" element={<PendingCollectors />} />
+            <Route path="/admin/collectors" element={<AllCollectors />} />
+            <Route path="/admin/requests" element={<AllRequests />} />
+          </Route>
+        </Route>
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
 }
