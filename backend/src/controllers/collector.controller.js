@@ -118,8 +118,16 @@ const loginCollector = asyncHandler(async (req, res) => {
 
      res
    .status(200)
-   .cookie("accessToken", accessToken, { httpOnly: true, secure: false})
-   .cookie("refreshToken", refreshToken, { httpOnly: true, secure: false})
+   .cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
+.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
    .json(
        new apiResponse(
            200,
@@ -142,8 +150,16 @@ const logoutCollector = asyncHandler(async (req, res) => {
     await removeCollectorRefreshToken(collectorId);
 
     res
-        .clearCookie("accessToken")
-        .clearCookie("refreshToken")
+        .clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
+.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
         .status(200)
         .json(
             new apiResponse(200, {}, "Collector logged out successfully")
@@ -201,7 +217,11 @@ const refreshAccessToken = asyncHandler(async(req, res)=> {
     })
 
     res 
-        .cookie("accessToken" , newAccessToken, { httpOnly:true, secure: false })
+        .cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
         .status(200)
         .json(
             new apiResponse(200, {newAccessToken}, "Access Token refreshed")
@@ -240,8 +260,16 @@ const changePassword = asyncHandler(async (req, res) => {
     await removeCollectorRefreshToken(collector.collector_id)
 
     res
-        .clearCookie("accessToken", { httpOnly: true, secure: false })
-        .clearCookie("refreshToken", { httpOnly: true, secure: false })
+        .clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
+.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
         .status(200)
         .json(
             new apiResponse(200, {}, "Password updated successfully. Please login again.")

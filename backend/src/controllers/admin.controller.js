@@ -57,8 +57,16 @@ const isPasswordCorrect = await bcrypt.compare( password, Admin.password_hash);
    
    res
    .status(200)
-   .cookie("accessToken", accessToken, { httpOnly: true, secure: false})
-   .cookie("refreshToken", refreshToken, { httpOnly: true, secure: false})
+   .cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
+.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
    .json(
     new apiResponse(200, {
         AdminId: Admin.admin_id,
@@ -75,8 +83,16 @@ const logoutAdmin = asyncHandler(async(req, res)=> {
     await removeAdminRefreshToken(Admin_id)
 
     res
-    .clearCookie("accessToken", { httpOnly : true, secure: false  })
-    .clearCookie("refreshToken", { httpOnly: true, secure: false })
+    .cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
+.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
     .json(
         new apiResponse(200, {}, "Logged out successfully")
     )
@@ -126,7 +142,12 @@ const refreshAccessToken = asyncHandler(async(req, res)=>{
 
     res
     .status(200)
-    .cookie("accessToken", newAccessToken, {httpOnly: true, secure: false})
+    .cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
+ 
     .json(
         new apiResponse(200, {newAccessToken}, "Access Token refreshed")
     )
@@ -166,8 +187,16 @@ const result = await updatePassword(Admin.admin_id, newPasswordHash);
 
   
     res
-        .clearCookie("accessToken", { httpOnly: true, secure: false })
-        .clearCookie("refreshToken", { httpOnly: true, secure: false })
+       .cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
+.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+})
         .status(200)
         .json(
             new apiResponse(200, {}, "Password updated successfully. Please login again.")
